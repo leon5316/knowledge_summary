@@ -1,0 +1,88 @@
+# =====================================================================
+# 知识总结与拓扑内核 — 默认配置
+# 所有可配置项都集中在此文件（单点配置）。
+# 用法:  python main.py <目标文件或文件夹> [--config 你的配置.yaml]
+# 任何键都可以在用户配置文件中覆盖；deep-merge 逐层合并。
+# API Key 绝不写入配置文件，只从环境变量读取（llm.api_key_env）。
+# =====================================================================
+
+general:
+  # 输出目录名（生成在被总结内容所在目录下，即 <源目录>/<output_dir_name>/）
+  output_dir_name: knowledge
+  # 递归扫描时忽略的目录名（任意层级命中即跳过）
+  ignore_dirs: [.git, .svn, .hg, node_modules, __pycache__, .venv, venv, dist, build, .idea, .vscode, knowledge]
+  # 额外的忽略 glob 模式（相对路径匹配，如 "*.min.js"、"docs/tmp/*"、"**/secret*"）
+  ignore_patterns: []
+  # 超过该大小的文件将被跳过（MB）
+  max_file_size_mb: 20
+  # 没有对应解析器的文件是否按纯文本处理（否则跳过并记录警告）
+  treat_unknown_as_text: false
+
+llm:
+  # 提供方: openai_compatible | ollama | anthropic | none（none = 离线静态模式，不调用任何 LLM）
+  provider: openai_compatible
+  # 模型名。openai_compatible 示例: deepseek-chat / gpt-4o / 本地 vLLM 模型名
+  model: deepseek-chat
+  # openai_compatible 的 API base_url，如 https://api.deepseek.com/v1
+  base_url: ""
+  # 从该环境变量读取 API Key（如 LLM_API_KEY）；本地服务无需 Key 时留空即可
+  api_key_env: LLM_API_KEY
+  temperature: 0.2
+  max_tokens: 4096
+  timeout_s: 120
+  retries: 3
+  # 并发请求数（块摘要/拓扑抽取时生效）
+  concurrency: 4
+  # 追加到系统提示词的内容（可用来规定输出语言/风格/禁止事项）
+  system_prompt_extra: ""
+  # LLM 调用失败时是否自动降级为离线静态模式（警告后继续）
+  fallback_to_local: true
+
+chunking:
+  # 单个块的字符数上限
+  max_chunk_chars: 4000
+  # 相邻块的重叠字符数（保证上下文连续性）
+  overlap_chars: 300
+  # 优先在空行/段落等语义边界处切分
+  prefer_semantic_boundary: true
+
+summarization:
+  enabled: true
+  # 摘要语言（出现在提示词中，要求 LLM 使用）。默认 [en] 生成英文总结；
+  # 需要中文时改为 [zh] 或 [zh, en]。
+  languages: [en]
+  # 分层级别: chunk(块级) / file(文件级) / global(全局总览)
+  hierarchy: [chunk, file, global]
+
+extractors:
+  pdf: { method: auto }        # auto | pypdf | pdfminer
+  doc: { method: auto }        # auto | antiword | libreoffice（旧版 .doc 二进制格式）
+  sql: { keep_comments: true }
+  python: { include_docstrings: true }
+  html: { include_tables: true }
+
+topology:
+  enabled: true
+  # 静态分析（Python 用 AST、SQL 用语句解析），无需 LLM
+  enable_static_analysis: true
+  # 用 LLM 从文本中补全语义实体与关系
+  enable_llm_relations: true
+  # 是否把高频关键词也作为 "concept" 实体加入拓扑
+  include_keywords_as_concepts: true
+  # 单个块最多保留的 LLM 关系数（防噪声）
+  max_relations_per_chunk: 100
+
+locate_index:
+  enabled: true
+  # 索引条目中摘录的最大字符数
+  max_snippet_chars: 200
+  # 每个文档提取的关键词数量（进入定位索引）
+  keyword_top_n: 30
+  include_keywords: true
+  include_entities: true
+
+storage:
+  overwrite: true
+  write_chunks: true
+  # chunks/ 目录最多写入的块文件数；超出则合并为单个 chunks_bundle.md
+  max_chunk_files: 500

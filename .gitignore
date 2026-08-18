@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+pytest_tmp/
+pytest-cache-files-*/
+
+# 环境
+.venv/
+venv/
+
+# 沙箱安装残留（本仓库开发环境专用）
+pip_tmp/
+vendor/
+
+# 知识库输出（演示目录除外）
+knowledge/

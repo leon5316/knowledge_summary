@@ -1,0 +1,14 @@
+# 核心依赖
+PyYAML>=6.0
+requests>=2.31
+sqlparse>=0.5
+
+# 文件解析器
+pypdf>=4.0            # PDF 文本提取
+python-docx>=1.1      # .docx 解析
+beautifulsoup4>=4.12  # HTML 解析
+
+# 可选依赖（按需安装）
+# pdfminer.six>=20231228   # pypdf 提取失败时的 PDF 备用解析器
+# anthropic>=0.34          # 使用 provider: anthropic 时需要
+# pytest>=8.0              # 运行 tests/ 需要
